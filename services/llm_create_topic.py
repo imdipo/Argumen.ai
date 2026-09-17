@@ -1,17 +1,28 @@
 import os
 import time
+import random
 
-from repositories.topic_repo import scheduled_count, insert_data
+from repositories.topic_repo import scheduled_count, create_topic_llm
 from groq import Groq
 from scrap_content_news import read_article
 
 DEFAULT_MODELS = "qwen/qwen3.8-27b"
+
+models_available = ["qwen/qwen3-32b", "groq/compound-mini", "llama-3.3-70b-versatile", "qwen/qwen3.8-27b"] # would like to add another in the future
+
+def pick_random_model():
+    total_model = len(models_available)
+    bot_a = models_available[random.randint(1, total_model)]
+    bot_b = models_available[random.randint(1, total_model)]
+
+    return bot_a, bot_b
 
 def topic_maker(model_name:str = DEFAULT_MODELS):
     total_antrian = scheduled_count()
 
     while total_antrian < 3:
         client = Groq(api_key=os.getenv("GROQ"))
+        bot_a, bot_b = pick_random_model()
 
         # start_time = time.time() # i was wanna see on average how much time it needs, but idk dont need it
 
@@ -36,7 +47,7 @@ def topic_maker(model_name:str = DEFAULT_MODELS):
         # token_used = message.usage.total_tokens
         debate_title_content = message.choices[0].message.content.strip()
 
-        insert_data(link, debate_title_content, model_name)
+        create_topic_llm(link, debate_title_content, model_name, bot_a, bot_b)
 
         total_antrian += 1
 
