@@ -1,7 +1,25 @@
 from connect_db import get_db
 
+def check_user(user_id):
+    with get_db() as cur:
+        cur.execute(
+            """--sql
+            SELECT id
+            FROM users
+            WHERE roblox_user_id = %s;
+            """,
+            (user_id,)
+        )
+
+        id_user = cur.fetchone()
+
+    if not id_user:
+        raise ValueError(f"Harus login dulu")
+
+    return id_user[0]
+
 def count_trending_news():
-    with get_db as cur:
+    with get_db() as cur:
         cur.execute(
             """--sql
             SELECT url FROM trending_news
@@ -15,7 +33,7 @@ def count_trending_news():
     return row[0]
 
 def flag_fail(link):
-    with get_db as cur:
+    with get_db() as cur:
         cur.execute(
             """--sql
             UPDATE trending_news
@@ -39,21 +57,43 @@ def scheduled_count():
 
     return total_antrian[0]
 
-def insert_data(
+def create_topic(
+        title: str,
+        created_by:str,
+        model_name : str,
+        category: str,
+        bot_a: str,
+        bot_b: str,
+        status: str = "scheduled"
+
+):
+    with get_db() as cur:
+        cur.execute(
+        """--sql
+        INSERT INTO debate_topics (title, category, bot_a, bot_b, model_name, created_by, status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """,
+        (title, category, bot_a, bot_b, model_name, status, created_by)
+        )
+
+
+
+def create_topic_llm(
         url: str,
         title: str,
         model_name : str,
-        category: str = "nasional",
-        status: str = "scheduled",
-        created_by:str = "AI"
+        bot_a: str,
+        bot_b: str,
 ):
-    with get_db as cur:
-        cur.execute(
-            """--sql
-            INSERT INTO debate_topics (title, category, model_name, status, created_by)
-            VALUES (%s, %s, %s, %s, %s);
-            """,
-            (title, category, model_name, status, created_by)
+    with get_db() as cur:
+        create_topic(
+            title = title,
+            category= "nasional",
+            model_name=model_name,
+            bot_a=bot_a,
+            bot_b=bot_b,
+            created_by=1,
+            status = "scheduled"
         )
 
         cur.execute(
@@ -64,3 +104,5 @@ def insert_data(
             """,
             (url,)
         )
+
+        return
