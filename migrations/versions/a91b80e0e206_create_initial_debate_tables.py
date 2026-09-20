@@ -31,13 +31,28 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS debate_topics (
     id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    topic_title VARCHAR(255) NOT NULL,
     category VARCHAR(50),
-    model_name VARCHAR(50) NOT NULL,
-    status VARCHAR(20) DEFAULT 'scheduled', -- scheduled / done
-    created_at TIMESTAMP DEFAULT NOW(),
 
-    created_by BIGINT NOT NULL REFERENCES users(id)
+    bot_pro VARCHAR(50) NOT NULL,
+    bot_kontra VARCHAR(50) NOT NULL,
+
+    status VARCHAR(20) DEFAULT 'scheduled', -- scheduled / done
+
+    created_by BIGINT NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS debate_research_sources(
+    id BIGSERIAL PRIMARY KEY,
+    round INT NOT NULL DEFAULT 1,
+    topic_title_id BIGINT NOT NULL REFERENCES debate_topics(id) ON DELETE CASCADE,
+    position VARCHAR(10) NOT NULL, -- pro / kontra
+    search_query_used TEXT NOT NULL,
+    source_title TEXT,
+    source_url TEXT,
+    raw_content TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS debate_messages (
@@ -45,14 +60,14 @@ CREATE TABLE IF NOT EXISTS debate_messages (
     topic_id BIGINT NOT NULL REFERENCES debate_topics(id) ON DELETE CASCADE,
     round_number INT NOT NULL,
 
-    bot_a VARCHAR(50) NOT NULL,
-    bot_b VARCHAR(50) NOT NULL,
+    speaker_position VARCHAR(10) NOT NULL,
 
     argument_text TEXT NOT NULL,
     tokens_used INT,
     response_latency_ms INT,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
 CREATE TABLE IF NOT EXISTS users_vote (
     id BIGSERIAL PRIMARY KEY,
     topic_id BIGINT UNIQUE NOT NULL REFERENCES debate_topics(id) ON DELETE CASCADE,
@@ -73,6 +88,7 @@ def downgrade() -> None:
     op.execute("""--sql
         DROP TABLE IF EXISTS users_vote CASCADE;
         DROP TABLE IF EXISTS debate_messages CASCADE;
+        DROP TABLE IF EXISTS debate_research_sources CASCADE;
         DROP TABLE IF EXISTS debate_topics CASCADE;
         DROP TABLE IF EXISTS users CASCADE;
         """)
