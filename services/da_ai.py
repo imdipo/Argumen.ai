@@ -1,10 +1,8 @@
 from core.groq_client import groq
-from rag_pre_debate import search_supporting_article
 from repositories.topic_repo import take_topic_research
 
 client = groq()
 
-history_debate = []
 
 class BotDebate:
     def __init__(self, id_topic, model_name, topic, position):
@@ -16,49 +14,66 @@ class BotDebate:
         self.has_searched = False
         self.is_talk_first = False
 
+        self.history_debate = []
+
+
     def take_support_article(self):
-        if self.has_searched == False:
-            id_debate_topic, position = take_topic_research()
-            articles = search_supporting_article(self.position, self.topic)
-            for article in articles:
-                self.list_article.append({
-                        "title": article["title"],
-                        "content": article["content"]})
-            self.has_searched = True
+
+        support_article = take_topic_research(id_debate_topic=self.id_topic, position=self.position)
+        self.has_searched = True
+
+        return support_article
 
     def prepare_first_argument(self):
-        self.search_support_article()
-        article_text = "\n\n".join([f"- {i['title']}: {i["content"]}" for i in self.list_article])
-        special_prompt = f"""Manfaatkan rujukan berikut bila relevan:
-                {article_text}"""
-        prompt = f"""
-                Kamu adalah ahli debat, sebagai seorang debater handal yang sedang membahas topic berupa '{self.topic}' dengan posisimu adalah {self.position.upper()}.
-                Tugasmu menyampaikan argumen persuasif dan logis dalam bahasa Indonesia.""" + special_prompt
+        self.article_text = self.take_support_article()
 
-        respone = client.chat.completions.create(
-            model=self.model_name,
-            messages=[{"role": "system", "content": prompt}],
-            temperature=0.6
-        )
-        completion = respone.choices[0].message.content.strip()
-        history_debate.append({
-            "role": self.position,
-            "content": completion
+        system_prompt = f"""Kamu adalah ahli debat, sebagai seorang debater handal yang sedang membahas topic berupa '{self.topic}' dengan posisimu adalah {self.position.upper()}.
+                Tugasmu menyampaikan argumen persuasif dan logis dalam bahasa Indonesia.
+
+                Manfaatkan rujukan berikut bila relevan: {self.article_text}"""
+
+        self.history_debate.append({
+            "role": "system",
+            "content": system_prompt
         })
 
+        if self.is_talk_first == True:
+            respone = client.chat.completions.create(
+            model=self.model_name,
+            messages=[{"role": "system", "content": system_prompt}],
+            temperature=0.6
+        )
+            completion = respone.choices[0].message.content.strip()
+            self.history_debate.append({
+                "role": "assistant",
+                "content": completion
+            })
+            self.is_talk_first == False
 
 
-    def battle(self):
-        if len(history_debate) == 0 and self.is_talk_first == True:
+    def talk(self, opponent_argument:None):
+        if self.has_searched == False:
             self.prepare_first_argument()
 
-        next_prompt = f"""
+        if opponent_argument:
+            self.history_debate.append({
+                "role": "user",
+                "content": opponent_argument
+            })
 
-            """
+            respone = client.chat.completions.create(
+                model=self.model_name,
+                messages=self.history_debate,
+                temperature=0.6
+            )
+            completion = respone.choices[0].message.content.strip()
+            self.history_debate.append({
+                "role": "assistant",
+                "content": completion
+            })
 
+        return completion
 
-
-def start_argue()
 
 
 
