@@ -3,6 +3,8 @@ from duckduckgo_search import DDGS
 from core.groq_client import groq
 import json
 
+from repositories.topic_repo import insert_topic_research, insert_topic_research, take_title_and_title_id
+
 client = groq
 
 def create_query(position, topic_article):
@@ -38,13 +40,17 @@ def create_query(position, topic_article):
         f"{position} mengenai {topic_article}"
     ]
 
-# ini gw pikirin nanti
+# i change it to this flow, because i want the rag process done before the match begin
 
-def search_supporting_article(position:str, topic_article:str):
+
+def search_supporting_article(id_topic_article:str, topic_article:str, position:str):
     queries = create_query(position=position, topic_article=topic_article)
 
+    # id_title = take_title_id(topic_article)
+
     seen_urls = set()
-    articles = []
+
+    batching_article=[]
 
     with DDGS() as ddgs:
         for qry in queries:
@@ -70,16 +76,16 @@ def search_supporting_article(position:str, topic_article:str):
                         )
 
                         if text_content and len(text_content) > 150:
-                            articles.append({
-                                "query": qry,
-                                "title": urls.get("title"),
-                                "url": url,
-                                "content": text_content[:1200]
-                            }
-                            )
+                            batching_article.append( {
+                                "id_debate_topic": id_topic_article,
+                                "position": position,
+                                "search_query_used":qry,
+                                "research_urls": url,
+                                "research_title": urls.get("title"),
+                                "research_content": text_content[:1200]
+                            })
+
             except Exception as e:
                 print(f"Error while searching about '{qry}':{e}")
 
-    return articles
-
-
+    insert_topic_research(batching_data=batching_article)
