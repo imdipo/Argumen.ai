@@ -26,12 +26,14 @@ CREATE TABLE IF NOT EXISTS users (
     roblox_user_id BIGINT UNIQUE NOT NULL,
     roblox_username VARCHAR(50) NOT NULL,
     avatar_url TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    last_seen TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    refresh_token TEXT
 );
 
 CREATE TABLE IF NOT EXISTS debate_topics (
     id BIGSERIAL PRIMARY KEY,
-    topic_title VARCHAR(255) NOT NULL,
+    topic_title VARCHAR(255) UNIQUE NOT NULL , -- tambahin
     category VARCHAR(50),
 
     bot_pro VARCHAR(50) NOT NULL,

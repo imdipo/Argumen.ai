@@ -1,5 +1,5 @@
-from core.groq_client import groq
-from repositories.topic_repo import take_topic_research
+from api.core.groq_client import groq
+from api.repositories.topic_repo import take_topic_research
 
 client = groq()
 

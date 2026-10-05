@@ -1,4 +1,4 @@
-from repositories.topic_repo import count_trending_news, flag_fail
+from api.repositories.topic_repo import count_trending_news, flag_fail
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,4 +31,3 @@ def read_article():
     )
 
     return content_article[:1000], link_article
-

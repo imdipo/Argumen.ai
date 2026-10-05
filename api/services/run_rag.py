@@ -1,6 +1,6 @@
-from repositories.topic_repo import check_debate_schedule
-from llm_create_topic import topic_maker
-from rag_pre_debate import search_supporting_article
+from api.repositories.topic_repo import check_debate_schedule
+from api.jobs.llm_create_topic import topic_maker
+from api.services.rag_pre_debate import search_supporting_article
 
 
 def check_schedule():

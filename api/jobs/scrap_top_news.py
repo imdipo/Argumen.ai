@@ -4,13 +4,18 @@ from pathlib import Path
 
 from psycopg2.extras import execute_values
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
+# ROOT_DIR = Path(__file__).resolve().parent.parent
+# if str(ROOT_DIR) not in sys.path:
+#     sys.path.insert(0, str(ROOT_DIR))
 
-from repositories.connect_db import get_db
+from api.repositories.connect_db import get_db
 
-def get_newest_article():
+"""
+this scrap news works for help the AI create topic. NOT for RAG yaa
+i think it will the best approach if the scrap news processed before pre-check (ofc it is sih)
+"""
+
+def get_newest_article(url:str):
     url = "https://www.cnnindonesia.com/nasional/rss"
     feed = feedparser.parse(url)
 

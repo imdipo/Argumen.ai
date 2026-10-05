@@ -1,5 +1,5 @@
-from repositories.topic_repo import check_user, create_topic
-from validate_topic import validate_topic
+from api.repositories.topic_repo import check_user, create_topic
+from api.services.validate_topic import validate_topic
 
 def user_topic(user,
                topic_title:str,

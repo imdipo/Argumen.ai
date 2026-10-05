@@ -1,9 +1,9 @@
 import trafilatura
 from duckduckgo_search import DDGS
-from core.groq_client import groq
+from api.core.groq_client import groq
 import json
 
-from repositories.topic_repo import insert_topic_research, insert_topic_research, take_title_and_title_id
+from api.repositories.topic_repo import insert_topic_research, insert_topic_research, take_title_and_title_id
 
 client = groq
 
