@@ -9,7 +9,7 @@ def read_article():
     count_undone_trending_news = count_trending_news()
 
     if count_undone_trending_news:
-        link_article = count_undone_trending_news[0]
+        link_article = count_undone_trending_news
 
     if not link_article:
         return None

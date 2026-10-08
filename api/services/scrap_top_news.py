@@ -8,7 +8,7 @@ from psycopg2.extras import execute_values
 # if str(ROOT_DIR) not in sys.path:
 #     sys.path.insert(0, str(ROOT_DIR))
 
-from api.repositories.connect_db import get_db
+from api.repositories.topic_repo import insert_trending_news
 
 """
 this scrap news works for help the AI create topic. NOT for RAG yaa
@@ -16,7 +16,6 @@ i think it will the best approach if the scrap news processed before pre-check (
 """
 
 def get_newest_article(url:str):
-    url = "https://www.cnnindonesia.com/nasional/rss"
     feed = feedparser.parse(url)
 
     newests_news_list = []
@@ -32,20 +31,13 @@ def get_newest_article(url:str):
 
     return newests_news_list
 
-def save_news():
-    da_list = get_newest_article()
-    print(len(da_list))
-    with get_db() as cur:
-        execute_values(
-            cur,
-            """--sql
-            INSERT INTO trending_news (title, url, source, published_at)
-            VALUES %s
-            ON CONFLICT (url) DO NOTHING;
-            """,
-            da_list
-        )
+def save_scrapped_news():
+    url = "https://www.cnnindonesia.com/nasional/rss"
+    da_list = get_newest_article(url=url)
+    # print(len(da_list))
+
+    insert_trending_news(da_list)
 
 
 if __name__ == "__main__":
-    save_news()
+    save_scrapped_news()

@@ -3,9 +3,9 @@ import time
 import random
 
 from api.core.groq_client import groq
-from api.repositories.topic_repo import scheduled_count, create_topic_llm
+from api.repositories.topic_repo import create_topic_llm
 from groq import Groq
-from api.jobs.scrap_content_news import read_article
+from api.services.scrap_content_news import read_article
 
 DEFAULT_MODELS = "qwen/qwen3.8-27b"
 
@@ -18,14 +18,14 @@ def pick_random_model():
 
     return bot_a, bot_b
 
-def topic_maker(total_antrian, model_name:str = DEFAULT_MODELS):
+def topic_maker(new_content, link, total_antrian, model_name:str = DEFAULT_MODELS):
     while total_antrian < 3:
         client = groq()
         bot_a, bot_b = pick_random_model()
 
         # start_time = time.time() # i was wanna see on average how much time it needs, but idk dont need it
 
-        new_content, link = read_article()
+        # new_content, link = read_article() # change the flow to usin kafka
 
         message = client.chat.completions.create(
             model= model_name,
