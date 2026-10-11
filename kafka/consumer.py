@@ -9,7 +9,8 @@ def create_consumer(topic: str, group_id: str):
     c = Consumer({
         "bootstrap.servers": "localhost:9092",
         "group.id": group_id,
-        "auto.offset.reset": "earliest"
+        "auto.offset.reset": "earliest",
+        'enable.auto.commit': False
     })
 
     c.subscribe([topic])
